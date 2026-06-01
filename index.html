@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pika mbi Ë</title>
+<style>
+    :root {
+        --bg-deep: #0f1c3f;
+        --bg-card: #1b2a4e;
+        --orange: #ff8c00;
+        --green: #2ecc71;
+        --white: #fff;
+        --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: var(--bg-deep); color: var(--white); min-height: 100vh; padding: 1rem; }
+    header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+    .logo { width: 40px; height: 40px; background: var(--orange); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--bg-deep); font-size: 1.5rem; }
+    h1 { font-size: 1.5rem; }
+    p { color: var(--muted); font-size: 0.85rem; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+    .stat { background: var(--bg-card); padding: 1rem; border-radius: 8px; text-align: center; }
+    .stat-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; }
+    .stat-value { font-size: 1.5rem; font-weight: bold; margin-top: 5px; }
+    .green { color: var(--green); }
+    .orange { color: var(--orange); }
+    .workspace { background: var(--bg-card); border-radius: 12px; padding: 1rem; }
+    .btns { margin-bottom: 1rem; display: flex; gap: 10px; }
+    .btn { padding: 0.6rem 1.2rem; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; font-size: 1rem; }
+    .btn-primary { background: var(--orange); color: var(--bg-deep); }
+    .btn-secondary { background: transparent; border: 1px solid #334155; color: var(--muted); }
+    .btn-primary:hover { background: #ffa500; }
+    .btn-secondary:hover { border-color: var(--white); color: var(--white); }
+    .panels { display: flex; gap: 1rem; }
+    .panel { flex: 1; }
+    .panel-title { font-size: 0.8rem; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; }
+    textarea { width: 100%; height: 300px; background: rgba(15,28,63,0.5); border: 1px solid #2d3c5e; border-radius: 8px; padding: 1rem; color: white; font-size: 1rem; line-height: 1.6; resize: none; }
+    #rezultati { background: rgba(15,28,63,0.5); border: 1px solid #2d3c5e; border-radius: 8px; padding: 1rem; height: 300px; overflow-y: auto; }
+    .fjale { display: flex; align-items: center; gap: 10px; padding: 6px 10px; margin-bottom: 4px; border-radius: 4px; }
+    .e-lexuar { background: rgba(46,204,113,0.15); }
+    .e-gabuar { background: rgba(255,140,0,0.15); }
+    .txt { font-weight: 600; min-width: 120px; }
+    .status { font-size: 0.7rem; padding: 2px 6px; border-radius: 3px; font-weight: 600; }
+    .ok { background: var(--green); color: var(--bg-deep); }
+    .jo { background: var(--orange); color: var(--bg-deep); }
+    .shig { color: var(--muted); }
+    .korr { color: var(--green); font-weight: 600; }
+    .empty { color: var(--muted); font-style: italic; }
+    @media (max-width: 768px) { .panels { flex-direction: column; } .stats { grid-template-columns: repeat(2, 1fr); } }
+</style>
+</head>
+<body>
+<header>
+    <div class="logo">P</div>
+    <div><h1>Pika mbi Ë</h1><p>Kontrollues fjalësh</p></div>
+</header>
+
+<div class="stats">
+    <div class="stat"><div class="stat-label">Fjalë</div><div class="stat-value" id="total">0</div></div>
+    <div class="stat"><div class="stat-label">✓ Sakta</div><div class="stat-value green" id="sakta">0</div></div>
+    <div class="stat"><div class="stat-label">✗ Gabim</div><div class="stat-value orange" id="gabim">0</div></div>
+    <div class="stat"><div class="stat-label">% Saktësi</div><div class="stat-value green" id="pct">0%</div></div>
+</div>
+
+<div class="workspace">
+    <div class="btns">
+        <button type="button" class="btn btn-secondary" id="btn-pastro">Pastro</button>
+        <button type="button" class="btn btn-primary" id="btn-kontrollo">Kontrollo</button>
+    </div>
+    <div class="panels">
+        <div class="panel"><div class="panel-title">Shkruaj</div><textarea id="hyjja" placeholder="Shkruaj tekstin këtu..."></textarea></div>
+        <div class="panel"><div class="panel-title">Rezultati</div><div id="rezultati"><div class="empty">Rezultati do të shfaqet këtu...</div></div></div>
+    </div>
+</div>
+
+<script>
+// ============================================
+// FJALORI I PLOTË I GJUHËS SHQIPE
+// ============================================
+const fjalori = new Set([
+    // Folje - present
+    'kam','ke','ka','kemi','kan','kisha','kishin','kishte','kishin','kemi','kanë','jam','je','është','jemi','janë','ishte','ishin','jeni','jem','bëj','bën','bëri','bëjnë','bëra','bëre','bërë','them','thotë','thonë','thashë','thash','thuaj','thua','thënë','fle','flin','flë','flet','shkoj','shkon','shkoi','shkuar','shkova','shko','shku','vim','vjen','vajti','ardhur','ha','hënë','hëngri','marr','merr','mori','marë','jap','jep','dhanë','vë','vuri','vënë','di','dë','din','ngri','ngrit','filloj','fillon','filloi','filluar','mbaroj','mbar','mbaroi','mbaruar','mësoj','mëson','mësoi','mësuar','shkruaj','shkruan','shkroi','shkruar','lexoj','lexon','lexoi','lexuar','kuptoj','kupton','kuptoi','kuptuar','gaboj','gabon','gaboi','gabuar','gjej','gjen','gjeti','gjetur','lë','lës','la','lënë','guxoj','guxon','guxoi','guxuar','mund','mundet','dëshiroj','do','fle','flë','ngri','ngrit',
+    
+    // Emra
+    'njeri','njerëz','njeriu','baba','mama','motër','vëlla','burrë','grua','vajzë','fëmijë','shok','mik','miq','shtëpi','shkollë','universitet','libër','faqe','karrige','dritare','derë','kohë','vit','ditë','natë','vend','shtet','qytet','bashki','fshat','vend','ora','kohë','mbrëmë','mëngjes',
+    
+    // Mbiemra
+    'i madh','e madhe','i vogël','e vogël','i ri','e re','i vjetër','e vjetër','i mirë','e mirë','i keq','e keqe','i bukur','e bukur',
+    
+    // Përembra
+    'unë','ti','ai','ajo','ne','ju','ata','ato','kjo','ky','këto','ata','atë',
+    
+    // Pyetëse
+    'kush','çka','pse','si','kur','ku','sa',
+    
+    // Lidhëza
+    'dhe','ose','por','nëse','se','që','të','me','pa','për','nga','te','prej','sipër','poshtë','para','mbrapa','lartë','djathtë','majtë',
+    
+    // Përshëndetje
+    'përshëndetje','faleminderit','mirëmëngjes','mirëdita','mirëmbrëma','natën','mirupafshim',
+    
+    // Të tjera
+    'shumë','pak','mirë','keq','tani','sot','dje','nesër','këtu','atje','kudo','disa','tëgjithë','asgjë','gjithmonë','herët','vonë','asnjë'
+]);
+
+// Korrigjimet = gabim : i saktë
+const korrigjimet = {
+    'pershendetje':'përshëndetje','perhendetje':'përshëndetje',
+    'miremengjes':'mirëmëngjes','miremorgjen':'mirëmëngjes','mirëmorgën':'mirëmëngjes',
+    'miredita':'mirëdita','mirëdit':'mirëdita',
+    'mirembarema':'mirëmbrëma','mirëmbërëm':'mirëmbrëma',
+    'naten':'natën','natn':'natën',
+    'faleminderi':'faleminderit','flm':'faleminderit',
+    'vtm':'vërtetë','vrt':'vërtetë',
+    'nukk':'nuk',
+    'eshte':'është','esht':'është','ësht':'është',
+    'bej':'bëj','behet':'bëhet','beni':'bëni','ben':'bën',
+    'thom':'them','thash':'thashë',
+    'fle':'flë','fleep':'flë',
+    'nje':'një',
+    'deshiroj':'dëshiroj',
+    'dicka':'diçka','diqka':'diçka',
+    'gje':'gjë','poshte':'poshtë','vene':'vonë',
+    'heret':'herët',
+    'skgj':'skagjë',
+    'cpb':'çfarë po bën',
+    'ntn':'natën',
+    'gjithmone':'gjithmonë','nse':'nëse',
+    'te':'të','qe':'që','keto':'këto',
+    'dam':'djam','vim':'kam',
+};
+
+// ============================================
+// FUNKSIONET
+// ============================================
+
+function pastro() {
+    console.log('Pastro uclic');
+    document.getElementById('hyjja').value = '';
+    document.getElementById('rezultati').innerHTML = '<div class="empty">Rezultati do të shfaqet këtu...</div>';
+    document.getElementById('total').textContent = '0';
+    document.getElementById('sakta').textContent = '0';
+    document.getElementById('gabim').textContent = '0';
+    document.getElementById('pct').textContent = '0%';
+}
+
+function kontrollo() {
+    console.log('Kontrollo uclic');
+    let tekst = document.getElementById('hyjja').value;
+    
+    if (!tekst.trim()) { 
+        alert('Shkruaj diçka!');
+        return; 
+    }
+    
+    // Ndaj tekstin në fjalë
+    let fjalët = tekst.match(/[a-zA-ZÀ-ÿ]+/g) || [];
+    let rezultat = '';
+    let sakta = 0;
+    let gabuar = 0;
+    
+    fjalët.forEach(fjala => {
+        let f = fjala.toLowerCase();
+        let eSaktë = false;
+        let eKorrigjuar = fjala;
+        let klasa = 'e-lexuar';
+        
+        // Kontrollo në fjalor
+        if (fjalori.has(f)) {
+            eSaktë = true;
+        }
+        // Kontrollo korrigjimet
+        else if (korrigjimet[f]) {
+            eSaktë = false;
+            eKorrigjuar = korrigjimet[f];
+            // Ruaj shkronjën e parë
+            if (fjala[0] === fjala[0].toUpperCase()) {
+                eKorrigjuar = eKorrigjuar.charAt(0).toUpperCase() + eKorrigjuar.slice(1);
+            }
+            gabuar++;
+            klasa = 'e-gabuar';
+        }
+        else {
+            // Nuk e gjetëm - konsiderohet e saktë
+            eSaktë = true;
+        }
+        
+        if (eSaktë) {
+            sakta++;
+        }
+        
+        // Shto në rezultat
+        if (eSaktë) {
+            rezultat += `<div class="fjale ${klasa}">
+                <span class="txt">${fjala}</span>
+                <span class="status ok">OK</span>
+            </div>`;
+        } else {
+            rezultat += `<div class="fjale ${klasa}">
+                <span class="txt">${fjala}</span>
+                <span class="status jo">GABIM</span>
+                <span class="shig">→</span>
+                <span class="korr">${eKorrigjuar}</span>
+            </div>`;
+        }
+    });
+    
+    // Shfaq rezultatin
+    document.getElementById('rezultati').innerHTML = rezultat;
+    
+    // Përditëso stats
+    let total = fjalët.length;
+    document.getElementById('total').textContent = total;
+    document.getElementById('sakta').textContent = sakta;
+    document.getElementById('gabim').textContent = gabuar;
+    let pct = total > 0 ? Math.round((sakta / total) * 100) : 0;
+    document.getElementById('pct').textContent = pct + '%';
+    
+    console.log('Total:', total, 'Sakta:', sakta, 'Gabim:', gabuar);
+}
+
+// ============================================
+// EVENT LISTENERS
+// ============================================
+document.getElementById('btn-pastro').addEventListener('click', pastro);
+document.getElementById('btn-kontrollo').addEventListener('click', kontrollo);
+
+console.log('Skripta u ngarkua!');
+</script>
+</body>
+</html>
